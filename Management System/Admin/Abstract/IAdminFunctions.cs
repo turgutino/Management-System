@@ -15,6 +15,6 @@ public interface IAdminFunctions
 
     void Update_Product();
 
-    void Update_Profile(User user2);
+    void UpdateProfile(User user2);
 
 }

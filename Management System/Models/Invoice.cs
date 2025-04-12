@@ -6,7 +6,7 @@ public class Invoice:BaseEntity
 
     public Guid InvoiceNumber { get; set; } = Guid.NewGuid();
 
-    ICollection<Order> Orders { get; set; }
+    public ICollection<Order> Orders { get; set; }
 
     public int UserId { get; set; }
 

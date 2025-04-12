@@ -12,6 +12,10 @@ namespace Management_System.Data
 
         public DbSet<OrderProduct> OrderProducts { get; set; }
 
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer("Data Source=TURGUT-SOFUYEV\\SQLEXPRESS;Initial Catalog=ManagementSystem;Integrated Security=True;Trust Server Certificate=True;");
@@ -35,6 +39,23 @@ namespace Management_System.Data
                 .WithMany(p => p.OrderProducts)
                 .HasForeignKey(op => op.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Cart>()
+               .HasOne(c => c.User)
+               .WithMany()
+               .HasForeignKey(c => c.UserId);
+
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.Cart)
+                .WithMany(c => c.CartItems)
+                .HasForeignKey(ci => ci.CartId);
+
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.Product)
+                .WithMany()
+                .HasForeignKey(ci => ci.ProductId);
+
+
         }
 
 

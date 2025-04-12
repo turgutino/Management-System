@@ -4,6 +4,7 @@ using Management_System.CashierRepository.Concret;
 using Management_System.Data;
 using Management_System.Models;
 using Management_System.Repository.Abstract;
+using Management_System.Securities;
 using Management_System.UserRepository.Concret;
 
 namespace Management_System.Repository.Concret;
@@ -15,49 +16,63 @@ public class SignIn:ISignIn
     AdminFunctions adminFunctions;
     UserFunctions userFunctions;
     CashierFunctions cashierFunctions;
+    HiddenPassword hiddenPassword;
     public SignIn(AppDbContext context)
     {
         _context = context;
         adminFunctions = new AdminFunctions(context);
         userFunctions = new UserFunctions(context);
         cashierFunctions = new CashierFunctions(context);
+        hiddenPassword = new HiddenPassword();
     }
     public void SignInMenu()
     {
         Console.WriteLine("                                                        Sign In");
         Console.Write("Enter username : ");
         string username = Console.ReadLine();
+
+       
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            Console.WriteLine("\nNo username entered. Returning to main menu...");
+            Thread.Sleep(1000);
+            return; 
+        }
+
         Console.Write("Enter password : ");
-        string password = Console.ReadLine();
+        string password = hiddenPassword.ReadPassword();
 
-        var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Password == password && u.IsDeleted == false);
+        
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            Console.WriteLine("\nNo password entered. Returning to main menu...");
+            Thread.Sleep(1000);
+            return;
+        }
 
-        if (user != null)
+        var user = _context.Users.FirstOrDefault(u => u.Username == username && u.IsDeleted == false);
+
+        if (user != null && PasswordHash.VerifyPassword(password, user.Password))
         {
             Console.WriteLine("\n                                                     Login successful!");
             Thread.Sleep(1000);
 
-            if (user.UserRole==Enum.Role.Admin)
+            switch (user.UserRole)
             {
-                
-                Admin_Menu(user);
+                case Enum.Role.Admin:
+                    Admin_Menu(user);
+                    break;
+                case Enum.Role.User:
+                    UserMenu(user);
+                    break;
+                case Enum.Role.Cashier:
+                    CashierMenu(user);
+                    break;
+                default:
+                    Console.WriteLine("Undefined role. Please contact admin.");
+                    Thread.Sleep(1000);
+                    break;
             }
-            else if (user.UserRole==Enum.Role.User)
-            {
-                
-                UserMenu(user);
-            }
-            else if (user.UserRole == Enum.Role.Cashier)
-            {
-                CashierMenu(user);
-
-            }
-            else
-            {
-                Console.WriteLine("Undefined role. Please contact admin.");
-                Thread.Sleep(1000);
-            }
-
         }
         else
         {
@@ -68,6 +83,7 @@ public class SignIn:ISignIn
     }
 
 
+
     public void UserMenu(User user)
     {
         while (true)
@@ -75,40 +91,75 @@ public class SignIn:ISignIn
             Console.Clear();
             Console.WriteLine($"Welcome, {user.Username}!");
             Console.WriteLine("1 -> View Products");
-            Console.WriteLine("2 -> Add Products to Order"); 
-            Console.WriteLine("3 -> Update Profile");
-            Console.WriteLine("4 -> Log out");
+            Console.WriteLine("2 -> Add Products to Cart");
+            Console.WriteLine("3 -> View/Modify Cart");
+            Console.WriteLine("4 -> Confirm Cart");
+            Console.WriteLine("5 -> View Confirm Cart");
+            Console.WriteLine("6 -> Update Profile");
+            Console.WriteLine("7 -> View Invoice History");
+            Console.WriteLine("8 -> Log out");
             Console.Write("Select an option: ");
             string option = Console.ReadLine();
 
-            if (option == "1")
+            switch (option)
             {
-                adminFunctions.ViewProducts();
-                Console.WriteLine("Press Enter to return to menu...");
-                Console.ReadLine();
-            }
-            else if (option == "2")
-            {
-                userFunctions.AddProductsToOrder(user); 
-                Console.WriteLine("Press Enter to return to menu...");
-                Console.ReadLine();
-            }
-            else if (option == "3")
-            {
-                userFunctions.UpdateProfile(user);
-                Thread.Sleep(1000);
-            }
-            else if (option == "4")
-            {
-                break;
-            }
-            else
-            {
-                Console.WriteLine("Invalid option. Please try again.");
-                Thread.Sleep(1000);
+                case "1":
+                    adminFunctions.ViewProducts();
+                    Console.WriteLine("\nPress Enter to return to menu...");
+                    Console.ReadLine();
+                    break;
+
+                case "2":
+                    userFunctions.AddProductsToCart(user);
+                    Console.WriteLine("\nPress Enter to return to menu...");
+                    Console.ReadLine();
+                    break;
+
+                case "3":
+                    userFunctions.ViewCart(user);
+                    Console.WriteLine("\nPress Enter to return to menu...");
+                    Console.ReadLine();
+                    break;
+
+                case "4":
+                    userFunctions.ConfirmCart(user);
+                    Console.WriteLine("\nPress Enter to return to menu...");
+                    Console.ReadLine();
+                    break;
+
+
+                case "5":
+                    userFunctions.ViewConfirmedCarts(user);
+                    
+                    Thread.Sleep(1000);
+                    break;
+
+                case "6":
+                    userFunctions.UpdateProfile(user);
+                    Console.WriteLine("\nProfile updated successfully!");
+                    Thread.Sleep(1000);
+                    break;
+
+                case "7":
+                    userFunctions.ViewInvoiceHistory(user);
+                    Console.WriteLine("\nPress Enter to return to menu...");
+                    Console.ReadLine();
+                    break;
+
+                case "8":
+                    return;
+
+                default:
+                    Console.WriteLine("Invalid option. Please try again.");
+                    Thread.Sleep(1000);
+                    break;
             }
         }
     }
+
+
+
+
 
 
     public void CashierMenu(User user)
@@ -187,7 +238,7 @@ public class SignIn:ISignIn
                     adminFunctions.ViewProducts();
                     break;
                 case "7":  
-                    adminFunctions.Update_Profile(user);
+                    adminFunctions.UpdateProfile(user);
                     break;
                 case "0":
                     return;

@@ -1,6 +1,7 @@
 ﻿using Management_System.Admin.Abstract;
 using Management_System.Data;
 using Management_System.Models;
+using Management_System.Securities;
 
 namespace Management_System.Admin.Concret;
 
@@ -245,47 +246,45 @@ public class AdminFunctions:IAdminFunctions
     }
 
 
-    public void Update_Profile(User user2)
+    public void UpdateProfile(User user)
     {
         Console.Clear();
-        Console.WriteLine("                                             Update Profile\n");
-        
-        
-        var user = _context.Users.FirstOrDefault(u => u.Id == user2.Id); 
-        
-        if (user == null)
-        {
-            Console.WriteLine("User not found.");
-            Thread.Sleep(1500);
-            return;
-        }
-        
-        Console.WriteLine($"Updating Profile: {user.Username}\n");
-        
-        
+        Console.WriteLine("Update Your Profile\n");
+
+        Console.Write($"Enter new name (current: {user.Name}): ");
+        string name = Console.ReadLine();
+        if (!string.IsNullOrWhiteSpace(name))
+            user.Name = name;
+
+        Console.Write($"Enter new surname (current: {user.Surname}): ");
+        string surname = Console.ReadLine();
+        if (!string.IsNullOrWhiteSpace(surname))
+            user.Surname = surname;
+
         Console.Write($"Enter new username (current: {user.Username}): ");
         string username = Console.ReadLine();
         if (!string.IsNullOrWhiteSpace(username))
             user.Username = username;
-        
-        
+
         Console.Write($"Enter new email (current: {user.Email}): ");
         string email = Console.ReadLine();
         if (!string.IsNullOrWhiteSpace(email))
             user.Email = email;
-        
-        
-        Console.Write($"Enter new password (current: {user.Password}): ");
-        string password = Console.ReadLine();
-        if (!string.IsNullOrWhiteSpace(password))
-            user.Password = password;  
-        
+
+        Console.Write("Enter new password (leave empty to keep current): ");
+        var hiddenPassword = new HiddenPassword();
+        string newPassword = hiddenPassword.ReadPassword();
+
+        if (!string.IsNullOrWhiteSpace(newPassword))
+            user.Password = PasswordHash.HashPassword(newPassword);
+
         _context.Users.Update(user);
         _context.SaveChanges();
-        
+
         Console.WriteLine("\nProfile updated successfully!");
         Thread.Sleep(1500);
     }
+
 
     private void Pause()
     {
