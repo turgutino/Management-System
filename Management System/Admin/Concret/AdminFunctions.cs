@@ -43,7 +43,24 @@ public class AdminFunctions:IAdminFunctions
     public void DeleteUser()
     {
         Console.Clear();
-        Console.WriteLine("                                             Delete User\n");
+        Console.WriteLine("List of Active Users :\n");
+
+        var users = _context.Users
+                            .Where(u => u.IsDeleted == false)
+                            .ToList();
+
+        if (users.Count == 0)
+        {
+            Console.WriteLine("No active users found.");
+        }
+        else
+        {
+            foreach (var user2 in users)
+            {
+                Console.WriteLine($"ID: {user2.Id} | Username: {user2.Username}");
+            }
+        }
+        Console.WriteLine("\nDelete User : \n");
 
         Console.Write("Enter username to delete: ");
         string username = Console.ReadLine();
@@ -150,7 +167,24 @@ public class AdminFunctions:IAdminFunctions
     public void Delete_Product()
     {
         Console.Clear();
-        Console.WriteLine("                                             Delete Product\n");
+        Console.WriteLine("List of Available Products:\n");
+
+        var products = _context.Products
+            .Where(p => !p.IsDeleted && p.Count > 0)
+            .ToList();
+
+        if (!products.Any())
+        {
+            Console.WriteLine("No products found.");
+            return;
+        }
+
+        foreach (var product2 in products)
+        {
+            Console.WriteLine($"ID: {product2.Id} | Name: {product2.Name} | Price: {product2.Price} | Quantity: {product2.Count}");
+        }
+
+        Console.WriteLine("\nDelete Product : \n");
         Console.WriteLine();
         int product_id=Correct_Id();
 

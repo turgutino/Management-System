@@ -106,7 +106,8 @@ namespace Management_System.CashierRepository.Concret
                 selectedOrder.User.Username,
                 selectedOrder.OrderProducts.ToList(),
                 selectedOrder.TotalPrice,
-                cashierUser.Username 
+                cashierUser.Name,
+                cashierUser.Surname
             );
 
             if (string.IsNullOrEmpty(pdfFilePath))

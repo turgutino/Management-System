@@ -51,7 +51,7 @@ namespace Management_System.SendMail
             }
         }
 
-        public string GenerateInvoicePdf(string customerName, List<OrderProduct> orderProducts, decimal totalPrice, string cashierName)
+        public string GenerateInvoicePdf(string customerName, List<OrderProduct> orderProducts, decimal totalPrice, string cashierName,string cashierSurname)
         {
             if (orderProducts == null || !orderProducts.Any())
             {
@@ -136,18 +136,19 @@ namespace Management_System.SendMail
                     y += 15;
                     gfx.DrawString("E-mail: turgut.nitro17@gmail.com", regularFont, XBrushes.Black, 20, y);
                     y += 15;
-                    gfx.DrawString("Satıcı: Turgut Sofuyev", regularFont, XBrushes.Black, 20, y);
+                    gfx.DrawString("Sahibkar: Turgut Sofuyev", regularFont, XBrushes.Black, 20, y);
                     y += 15;
 
                     
-                    gfx.DrawString($"Kassir: {cashierName}", regularFont, XBrushes.Black, 20, y);
+                    gfx.DrawString($"Kassir: {cashierName} {cashierSurname}", regularFont, XBrushes.Black, 20, y);
 
                     
                     pdfDoc.Save(filePath);
                 }
 
                 
-                Console.WriteLine("Invoice PDF uğurla yaradıldı.");
+                Console.WriteLine("Invoice PDF uğurla yaradıldı.Ve userin gmail unvanina gonderildi.QEYD:Bu mesaj spama duse biler spamlar bolmesini yoxlamagi unutmayin");
+                Thread.Sleep(3000);
                 return filePath;
             }
             catch (Exception ex)
