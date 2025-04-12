@@ -371,9 +371,4 @@ public class UserFunctions:IUserFunctions
         Console.Write("\nPress any key to return...");
         Console.ReadKey();
     }
-
-
-
-
-
 }

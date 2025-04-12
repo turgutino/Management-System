@@ -5,7 +5,9 @@ using Management_System.Data;
 using Management_System.Models;
 using Management_System.Repository.Abstract;
 using Management_System.Securities;
+using Management_System.SendMail;
 using Management_System.UserRepository.Concret;
+using System.Net.Mail;
 
 namespace Management_System.Repository.Concret;
 
@@ -17,6 +19,8 @@ public class SignIn:ISignIn
     UserFunctions userFunctions;
     CashierFunctions cashierFunctions;
     HiddenPassword hiddenPassword;
+    Forgotpassword forgotPassword;
+    
     public SignIn(AppDbContext context)
     {
         _context = context;
@@ -24,33 +28,51 @@ public class SignIn:ISignIn
         userFunctions = new UserFunctions(context);
         cashierFunctions = new CashierFunctions(context);
         hiddenPassword = new HiddenPassword();
+        forgotPassword = new Forgotpassword();
     }
     public void SignInMenu()
     {
         Console.WriteLine("                                                        Sign In");
-        Console.Write("Enter username : ");
+        Console.Write("Enter username (or type 'forgot' to reset password): ");
         string username = Console.ReadLine();
 
-       
         if (string.IsNullOrWhiteSpace(username))
         {
             Console.WriteLine("\nNo username entered. Returning to main menu...");
             Thread.Sleep(1000);
-            return; 
+            return;
         }
+
+        if (username.Trim().ToLower() == "forgot")
+        {
+            Console.Write("Enter your registered email: ");
+            string email = Console.ReadLine();
+
+            var userByEmail = _context.Users.FirstOrDefault(u => u.Email == email && !u.IsDeleted);
+            if (userByEmail == null)
+            {
+                Console.WriteLine("No user found with that email.");
+                Thread.Sleep(1000);
+                return;
+            }
+
+            var forgotPassword = new Forgotpassword();
+            forgotPassword.ForgotPassword(userByEmail);
+            _context.SaveChanges(); 
+            return;
+        }
+
+        var user = _context.Users.FirstOrDefault(u => u.Username == username && u.IsDeleted == false);
 
         Console.Write("Enter password : ");
         string password = hiddenPassword.ReadPassword();
 
-        
         if (string.IsNullOrWhiteSpace(password))
         {
             Console.WriteLine("\nNo password entered. Returning to main menu...");
             Thread.Sleep(1000);
             return;
         }
-
-        var user = _context.Users.FirstOrDefault(u => u.Username == username && u.IsDeleted == false);
 
         if (user != null && PasswordHash.VerifyPassword(password, user.Password))
         {
@@ -81,6 +103,8 @@ public class SignIn:ISignIn
             SignInMenu();
         }
     }
+
+
 
 
 
@@ -181,7 +205,7 @@ public class SignIn:ISignIn
             }
             else if (option == "2")
             {
-                cashierFunctions.ReviewAndApproveOrders(user); // <-- Added here
+                cashierFunctions.ReviewAndApproveOrders(user); 
             }
             else if (option == "3")
             {

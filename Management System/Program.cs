@@ -9,11 +9,11 @@ namespace Management_System
         static void Main(string[] args)
         {
             Menu menu = new Menu();
-            //SignUp signUp = new SignUp();
-            menu.Introduction();
-            //signUp.SignUpMenu();
-           
             
+            menu.Introduction();
         }
     }
 }
+            
+           
+            
